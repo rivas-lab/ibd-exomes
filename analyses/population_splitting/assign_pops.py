@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 
-manifest = pd.read_table('IBD_WES_MANIFEST_AUGUST2019.txt')
+manifest = pd.read_table('manifest/IBD_WES_MANIFEST_AUGUST2019.txt')
 
-genomes_manifest = pd.read_table('IMMUNE_CCDG_WGS_MANIFEST_MAY2018.txt')
+genomes_manifest = pd.read_table('manifest/IMMUNE_CCDG_WGS_MANIFEST_MAY2018.txt')
 
 pop_dict = {'1KG': 'CONTROL',
             'ADSP': 'CONTROL',
@@ -25,7 +25,7 @@ pop_dict = {'1KG': 'CONTROL',
             'IRLRCI': 'CONTROL',
             'KELSEN': 'US- Other Cohorts',
             'KUGATHASAN': 'US- Other Cohorts',
-            'KUPCINSKAS': 'NFE',
+            'KUPCINSKAS': 'LIT',
             'LOUIS': 'NFE',
             'MCGOVERN': 'AJ',
             'MIGEN-LEICESTER': 'CONTROL',
@@ -68,11 +68,11 @@ manifest['RACE/ETHNICITY'] = 'NA'
 for i, row in manifest.iterrows():
 	manifest.at[i, 'RACE/ETHNICITY'] = pop_dict[manifest.at[i, 'COHORT']]
 
-manifest.to_csv('IBD_WES_MANIFEST_AUGUST2019_POP.txt', sep='\t', index=False)
-genomes_manifest = genomes_manifest[['SAMPID', 'RACE/ETHNICITY', 'DIAGNOSIS']]
+manifest.to_csv('manifest/IBD_WES_MANIFEST_AUGUST2019_POP.txt', sep='\t', index=False)
+genomes_manifest = genomes_manifest[['SAMPID', 'RACE/ETHNICITY', 'DIAGNOSIS', 'COHORT']]
 genomes_manifest['SAMPLE_ID'] = genomes_manifest['SAMPID']
-genomes_manifest = genomes_manifest[['SAMPLE_ID','RACE/ETHNICITY', 'DIAGNOSIS']]
+genomes_manifest = genomes_manifest[['SAMPLE_ID','RACE/ETHNICITY', 'DIAGNOSIS', 'COHORT']]
 
-pd.concat([manifest[['SAMPLE_ID', 'RACE/ETHNICITY', 'DIAGNOSIS']], genomes_manifest]).to_csv('v36+ccdg_pop+diagnosis.tsv', sep='\t', index=False)
+pd.concat([manifest[['SAMPLE_ID', 'RACE/ETHNICITY', 'DIAGNOSIS', 'COHORT']], genomes_manifest]).to_csv('v36+ccdg_pop+diagnosis.tsv', sep='\t', index=False)
 
 

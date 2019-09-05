@@ -92,6 +92,7 @@ print(mt.count())
 mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg+1kg_filtered.mt', overwrite=True)
 
 #LD PRUNE
+mt = mt.naive_coalesce(500)
 pruned_variants = hl.ld_prune(mt.GT)
 print("Pruning...")
 mt = mt.filter_rows(hl.is_defined(pruned_variants[mt.row_key]))
