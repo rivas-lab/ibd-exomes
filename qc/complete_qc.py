@@ -53,7 +53,7 @@ nfe_ht = nfe_ht.filter(hl.is_defined(nfe_ht.new_locus))
 nfe_ht = nfe_ht.key_by(locus = nfe_ht.new_locus, alleles = nfe_ht.alleles)
 mt = mt.annotate_rows(nfe_ht = nfe_ht[mt.row_key])
 
-make a literal with all variant types of interest
+#make a literal with all variant types of interest
 vars_of_interest = hl.literal({"frameshift_variant", "inframe_deletion", "inframe_insertion", "stop_lost", "stop_gained", "start_lost", "splice_acceptor_variant", "splice_donor_variant", "splice_region_variant", "missense_variant", "synonymous_variant"})
 
 #Variant narrowing:#############################################
@@ -158,7 +158,7 @@ print(mt.count())
 print("Doing Genotype QC...")
 mt = mt.annotate_entries(GT = hl.or_missing(mt.GQ > 20, mt.GT))
 
-Variant QC#####################################################
+#Variant QC#####################################################
 
 #Annotate with variant-level QC metrics
 print("Annotating with variant-level QC metrics...")
