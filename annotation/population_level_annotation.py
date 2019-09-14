@@ -1,7 +1,15 @@
 import hail as hl
 
 #Import mt file
-print('Reading in vcfs...')
+print('Reading in mt...')
+mt = hl.read_matrix_table()
+
+
+
+for pop in ['AJ', 'EAS', 'FIN', 'FC', 'LIT', 'NFE', 'SAS']:
+	hl.import_table('')
+
+
 #disease_strings = ['CD', 'IBD', 'UC']
 disease_strings = ['IBD']
 disease_tables = []

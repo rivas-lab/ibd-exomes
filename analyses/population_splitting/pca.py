@@ -33,13 +33,21 @@ mt = hl.read_matrix_table('gs://ibd-exomes/v36meta/v36+ccdg_082119.mt')
 print(mt.count())
 mt = hl.sample_qc(mt, name='sample_qc')
 
+cols = mt.cols()
+cols.select().export('gs://ibd-exomes/v36meta/v36+ccdg_samples.tsv')
+
 #Import 1000G
 print("Reading in 1KG data...")
 mt_1kg = hl.experimental.load_dataset(name='1000_Genomes_autosomes', version='phase_3', reference_genome='GRCh38')
 print(mt_1kg.count())
 
-print("Merging datasets...")
+print("Removing duplicates...")
+cur_samples = hl.import_table('gs://ibd-exomes/v36meta/v36+ccdg_samples.tsv')
+cur_samples = cur_samples.key_by('s')
+mt_1kg = mt_1kg.filter_cols(hl.is_defined(cur_samples[mt_1kg.s]), keep=False)
+print(mt_1kg.count())
 
+print("Merging datasets...")
 mt = mt.select_entries('GT')
 
 mt = mt.select_cols(mt.sample_qc.call_rate, mt.sample_qc.n_called, mt.sample_qc.n_not_called, 
@@ -54,7 +62,16 @@ mt_1kg = mt_1kg.select_cols(mt_1kg.sample_qc.call_rate, mt_1kg.sample_qc.n_calle
 
 mt = mt.union_cols(mt_1kg)
 print(mt.count())
-mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg+1kg.mt', overwrite=True)
+
+#Get rid of duplicate ID samples or samples with multiple labels
+print("Removing problematic samples...")
+problematic_samples = hl.import_table('gs://ibd-exomes/v36meta/problematic_samples.tsv')
+problematic_samples = problematic_samples.key_by('s')
+mt = mt.filter_cols(hl.is_defined(problematic_samples[mt.s]), keep=False)
+print(mt.count())
+
+# print("Checkpointing...")
+# mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg+1kg.mt', overwrite=True)
 
 #Filter on call rate
 print("Performing variant QC and filtering on call rate...")
@@ -100,7 +117,7 @@ mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg+1kg_pruned.mt', overwrite=T
 print(mt.count())
 
 #Pull out 1KG samples
-print("Grabbing 1KG samples...")
+print("Grabbing only the 1KG samples for projections...")
 kg_ht = hl.import_table('gs://ibd-exomes/v36meta/1kg_samples.tsv.bgz')
 kg_ht = kg_ht.key_by('s')
 kg_mt = mt.filter_cols(hl.is_defined(kg_ht[mt.s]), keep=True)
