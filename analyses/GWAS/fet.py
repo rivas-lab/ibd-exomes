@@ -6,7 +6,7 @@ import hail as hl
 
 hl.init(log='/home/fet.log')
 
-pop_strings = ['LIT']
+pop_strings = ['LIT', 'FIN']
 
 print("Reading in QC'ed MT...")
 mt = hl.read_matrix_table('gs://ibd-exomes/v36meta/v36+ccdg_qc.mt/')
@@ -17,6 +17,7 @@ diagnosis_info = hl.import_table('gs://ibd-exomes/v36meta/v36+ccdg_pop+diagnosis
 diagnosis_info = diagnosis_info.key_by('SAMPLE_ID')
 
 print("Annotating MT with diagnoses...")
+# WHY LOSE 1000 HERE???
 mt = mt.annotate_cols(DIAGNOSIS = diagnosis_info[mt.col_key].DIAGNOSIS)
 mt = mt.filter_cols(hl.is_defined(mt.DIAGNOSIS))
 print(mt.count())
@@ -38,7 +39,7 @@ for pop_string in pop_strings:
 
 	print("Subsetting by population...")
 	pop_mt = mt.filter_cols(hl.is_defined(pop_table[mt.s]), keep=True)
-	print(mt.count())
+	print(pop_mt.count())
 
 	print("Splitting samples into diagnosis sets for:")
 	print("CD...")
@@ -84,7 +85,11 @@ for pop_string in pop_strings:
 
 		print('Exporting population table for other analyses...')
 		pop_mt = pop_mt.annotate_rows(fet_p_value = pop_mt.fet.p_value)
-		pop_mt.write('gs://ibd-exomes/v36meta/' + pop_string + '_' + disease_string + '.mt')
+		pop_mt = pop_mt.annotate_rows(CHROM = pop_mt.locus.contig.replace('chr', ''), POS = pop_mt.locus.position, REF = pop_mt.alleles[0], ALT = pop_mt.alleles[1])
+		pop_mt = pop_mt.annotate_rows(V = hl.delimit(hl.array([pop_mt.CHROM, hl.str(pop_mt.POS), pop_mt.REF, pop_mt.ALT]), ":"))
+
+		pop_mt.write('gs://ibd-exomes/v36meta/' + pop_string + '_' + disease_string + '.mt', overwrite=True)
 
 		print('Exporting FET results to table...')
-		pop_mt.rows().select(V = hl.delimit(hl.array([pop_mt.locus.contig, hl.str(pop_mt.locus.position), pop_mt.alleles[0], pop_mt.alleles[1]]), ":"), P = pop_mt.fet_p_value, OR = pop_mt.OR, SE = pop_mt.se, CaAC = pop_mt.caac, CaNAC = pop_mt.canac, CoAC = pop_mt.coac, CoNAC = pop_mt.conac, maf = pop_mt.variant_qc.AF, call_rate = pop_mt.variant_qc.call_rate, mean_dp = pop_mt.variant_qc.dp_stats.mean, case_phwe = pop_mt.case_phwe, control_phwe = pop_mt.control_phwe).export('gs://ibd-exomes/' + pop_string + '_' + disease + '_FET_results.tsv.bgz')
+		rows = pop_mt.rows()
+		rows.select(V = rows.V, P = rows.fet_p_value, OR = rows.OR, SE = rows.se, CaAC = rows.caac, CaNAC = rows.canac, CoAC = rows.coac, CoNAC = rows.conac, maf = rows.variant_qc.AF, call_rate = rows.variant_qc.call_rate, mean_dp = rows.variant_qc.dp_stats.mean, case_phwe = rows.case_phwe, control_phwe = rows.control_phwe).export('gs://ibd-exomes/' + pop_string + '_' + disease_string + '_FET_results.tsv.bgz')
