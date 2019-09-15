@@ -2,11 +2,11 @@ import os
 import subprocess
 import hail as hl
 
-#hailctl dataproc start guhancluster --zone us-west1-b --num-workers 120 --worker-machine-type n1-highcpu-16 --master-machine-type n1-highmem-32 --worker-boot-disk-size 100
+#hailctl dataproc start guhancluster --zone us-west1-b --num-workers 120 --worker-machine-type n1-standard-16 --master-machine-type n1-highmem-32 --worker-boot-disk-size 100
 
 hl.init(log='/home/fet.log')
 
-pop_strings = ['LIT', 'FIN']
+pop_strings = ['AJ', 'FIN', 'LIT', 'NFE']
 
 print("Reading in QC'ed MT...")
 mt = hl.read_matrix_table('gs://ibd-exomes/v36meta/v36+ccdg_qc.mt/')
