@@ -42,12 +42,12 @@ hl.init(log='/home/eur_pca.log')
 # mt = hl.vep(mt, "gs://hail-common/vep/vep/vep95-GRCh38-loftee-gcloud.json")
 # print("Filtering for synonymous variants...")
 # mt = mt.filter_rows(mt.vep.most_severe_consequence == "synonymous_variant")
+# mt = mt.naive_coalesce(500)
 # mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg_eur_outlier_filtered.mt', overwrite=True)
 mt = hl.read_matrix_table('gs://ibd-exomes/v36meta/v36+ccdg_eur_outlier_filtered.mt')
 print(mt.count())
 
 #LD PRUNE
-mt = mt.naive_coalesce(500)
 pruned_variants = hl.ld_prune(mt.GT)
 print("Pruning...")
 mt = mt.filter_rows(hl.is_defined(pruned_variants[mt.row_key]))
