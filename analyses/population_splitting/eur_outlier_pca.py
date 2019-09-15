@@ -1,6 +1,6 @@
 import hail as hl
 
-hl.init(log='/home/eur_pca.log')
+# hl.init(log='/home/eur_pca.log')
 # mt = hl.read_matrix_table('gs://ibd-exomes/v36meta/v36+ccdg_082119.mt')
 
 # #Pull out EUR PCA samples
