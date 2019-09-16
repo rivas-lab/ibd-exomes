@@ -44,19 +44,21 @@ import hail as hl
 # mt = mt.filter_rows(mt.vep.most_severe_consequence == "synonymous_variant")
 # mt = mt.naive_coalesce(500)
 # mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg_eur_outlier_filtered.mt', overwrite=True)
-mt = hl.read_matrix_table('gs://ibd-exomes/v36meta/v36+ccdg_eur_outlier_filtered.mt')
+mt = hl.read_matrix_table("gs://ibd-exomes/v36meta/v36+ccdg_eur_outlier_filtered.mt")
 print(mt.count())
 
-#LD PRUNE
+# LD PRUNE
 pruned_variants = hl.ld_prune(mt.GT)
 print("Pruning...")
 mt = mt.filter_rows(hl.is_defined(pruned_variants[mt.row_key]))
-mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg_eur_outlier_pruned.mt', overwrite=True)
+mt = mt.checkpoint(
+    "gs://ibd-exomes/v36meta/v36+ccdg_eur_outlier_pruned.mt", overwrite=True
+)
 
-#PCA on the EUR samples
+# PCA on the EUR samples
 print("Performing PCA...")
 eigenvalues, scores, loadings = hl.hwe_normalized_pca(mt.GT, k=40)
 
 print("Exporting results...")
-scores.export('gs://ibd-exomes/v36meta/eur_outlier_40_pca_scores.tsv.bgz')
+scores.export("gs://ibd-exomes/v36meta/eur_outlier_40_pca_scores.tsv.gz")
 print(eigenvalues)

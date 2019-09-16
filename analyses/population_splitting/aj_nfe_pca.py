@@ -1,6 +1,6 @@
 import hail as hl
 
-hl.init(log='/home/aj_nfe_pca.log')
+hl.init(log="/home/aj_nfe_pca.log")
 # mt = hl.read_matrix_table('gs://ibd-exomes/v36meta/v36+ccdg_082119.mt')
 
 # #Pull out PCA samples
@@ -45,19 +45,19 @@ hl.init(log='/home/aj_nfe_pca.log')
 # print(mt.count())
 # mt = mt.naive_coalesce(500)
 # mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg_aj_nfe_filtered.mt', overwrite=True)
-mt = hl.read_matrix_table('gs://ibd-exomes/v36meta/v36+ccdg_aj_nfe_filtered.mt')
+mt = hl.read_matrix_table("gs://ibd-exomes/v36meta/v36+ccdg_aj_nfe_filtered.mt")
 
-#LD PRUNE
+# LD PRUNE
 pruned_variants = hl.ld_prune(mt.GT)
 print("Pruning...")
 mt = mt.filter_rows(hl.is_defined(pruned_variants[mt.row_key]))
-mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg_aj_nfe_pruned.mt', overwrite=True)
-mt = hl.read_matrix_table('gs://ibd-exomes/v36meta/v36+ccdg_aj_nfe_pruned.mt')
+mt = mt.checkpoint("gs://ibd-exomes/v36meta/v36+ccdg_aj_nfe_pruned.mt", overwrite=True)
+mt = hl.read_matrix_table("gs://ibd-exomes/v36meta/v36+ccdg_aj_nfe_pruned.mt")
 
-#PCA on the AJ/NFE samples
+# PCA on the AJ/NFE samples
 print("Performing PCA...")
 eigenvalues, scores, loadings = hl.hwe_normalized_pca(mt.GT, k=40)
 
 print("Exporting results...")
-scores.export('gs://ibd-exomes/v36meta/aj_nfe_40_pca_scores.tsv.bgz')
+scores.export("gs://ibd-exomes/v36meta/aj_nfe_40_pca_scores.tsv.gz")
 print(eigenvalues)
