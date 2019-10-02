@@ -8,9 +8,19 @@ hl.init(log="/home/fet.log")
 
 pop_strings = ["AJ", "FIN", "LIT", "NFE"]
 
+print("Reading in Full MT...")
+sex_mt = hl.read_matrix_table("gs://ibd-exomes/v36meta/v36+ccdg_082119.mt/")
+
+imputed_sex = hl.impute_sex(sex_mt.GT)
+imputed_sex = imputed_sex.checkpoint("gs://ibd-exomes/v36meta/imputed_sex.ht/", overwrite=True)
+
+# WHAT?
+
 print("Reading in QC'ed MT...")
 mt = hl.read_matrix_table("gs://ibd-exomes/v36meta/v36+ccdg_qc.mt/")
 print(mt.count())
+
+mt = mt.annotate_cols(is_female=imputed_sex[mt.col_key].is_female)
 
 print("Reading in diagnoses...")
 diagnosis_info = hl.import_table("gs://ibd-exomes/v36meta/v36+ccdg_pop+diagnosis.tsv")
@@ -148,6 +158,8 @@ for pop_string in pop_strings:
                 ":",
             )
         )
+
+        pop_ca_co_mt = hl.vep(pop_ca_co_mt, "gs://hail-common/vep/vep/vep95-GRCh38-loftee-gcloud.json")
 
         print("Writing to file...")
         pop_ca_co_mt.write(

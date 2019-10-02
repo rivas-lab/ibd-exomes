@@ -4,8 +4,8 @@ import hail as hl
 
 hl.init(log="/home/fet.log")
 
-# pop_strings = ["AJ", "FIN", "LIT", "NFE"]
-pop_strings = ["NFE"]
+pop_strings = ["AJ", "FIN", "LIT", "NFE"]
+# pop_strings = ["NFE"]
 
 for pop_string in pop_strings:
     # for disease_string in ["cd", "ibd", "uc"]:
@@ -42,26 +42,38 @@ for pop_string in pop_strings:
         )
         pop_ca_co_mt = pop_ca_co_mt.annotate_rows(fet_p_value=pop_ca_co_mt.fet.p_value)
 
+        pop_ca_co_mt = pop_ca_co_mt.annotate(
+            HGVSp=pop_ca_co_mt.vep.transcript_consequences.map(lambda x: x.hgvsp),
+            HGVSc=pop_ca_co_mt.vep.transcript_consequences.map(lambda x: x.hgvsc),
+            consequence=pop_ca_co_mt.vep.most_severe_consequence,
+            gene_symbol=pop_ca_co_mt.vep.transcript_consequences.map(lambda x: x.gene_symbol),
+        )
+
         print("Exporting FET results to table...")
         rows = pop_ca_co_mt.rows()
+        rows = rows.key_by()
         rows.select(
             V=rows.V,
-            P=rows.fet_p_value,
+            P=rows.P,
             OR=rows.OR,
-            SE=rows.se,
-            CaAC=rows.caac,
-            CaNAC=rows.canac,
-            CoAC=rows.coac,
-            CoNAC=rows.conac,
-            maf=rows.variant_qc.AF,
-            call_rate=rows.variant_qc.call_rate,
-            mean_dp=rows.variant_qc.dp_stats.mean,
+            SE=rows.SE,
+            CaAC=rows.CaAC,
+            CaNAC=rows.CaNAC,
+            CoAC=rows.CoAC,
+            CoNAC=rows.CoNAC,
+            maf=rows.maf,
+            call_rate=rows.call_rate,
+            mean_dp=rows.mean_dp,
             case_phwe=rows.case_phwe,
             control_phwe=rows.control_phwe,
+            HGVSp=rows.HGVSp,
+            HGVSc=rows.HGVSc,
+            consequence=rows.consequence,
+            gene_symbol=rows.gene_symbol,
         ).export(
             "gs://ibd-exomes/v36meta/"
-            + pop_string
+            + pop
             + "_"
-            + disease_string
+            + disease
             + "_FET_results.tsv.gz"
         )
