@@ -146,9 +146,12 @@ def write_file(vardict, varids, pops, disease, test):
 
 
 def main():
-    pops = ["curated.AFR", "AJ", "curated.HISZ12", "curated.HISZ3", "FIN", "LIT", "NFE"]
-    diseases = ["cd", "ibd", "uc"]
-    tests = ["FET", "logreg"]
+    #pops = ["curated.AFR", "AJ", "curated.HISZ12", "curated.HISZ3", "FIN", "LIT", "NFE"]
+    pops = ["AJ", "FIN", "LIT", "NFE"]
+    #diseases = ["cd", "ibd", "uc"]
+    diseases = ["ibd", "uc"]
+    #tests = ["FET", "logreg"]
+    tests = ["FET"]
     for disease in diseases:
         for test in tests:
             print("Storing data for " + test + " meta-analysis of " + disease + "...")

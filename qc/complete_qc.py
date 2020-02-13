@@ -95,17 +95,11 @@ variants = variants.filter(variants.x.contains(variants.vep.most_severe_conseque
 print("Variants left:")
 print(variants.count())
 
-# Annotate back in
+# Annotate back in, Autosomal Filtration
 mt = mt.annotate_rows(vep=variants[mt.row_key].vep)
 mt = mt.filter_rows(hl.is_defined(mt.vep))
 
 variants = None
-
-print("Checkpointing...")
-# mt = mt.checkpoint('gs://ibd-exomes/v36meta/v36+ccdg_varnarrow.mt', overwrite=True)
-mt = mt.checkpoint("gs://ibd-exomes/v36meta/v36_varnarrow.mt", overwrite=True)
-
-# Autosomal Filtration###########################################
 
 print("Filtering out X, Y, MT...")
 mt = mt.filter_rows(

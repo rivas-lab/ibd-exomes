@@ -35,10 +35,10 @@ for pop_string in pop_strings:
             )
         )
         pop_ca_co_mt = pop_ca_co_mt.annotate_rows(
-            se=1.0 / (pop_ca_co_mt.caac + 0.5)
+            se=hl.sqrt(1.0 / (pop_ca_co_mt.caac + 0.5)
             + 1.0 / (pop_ca_co_mt.canac + 0.5)
             + 1.0 / (pop_ca_co_mt.coac + 0.5)
-            + 1.0 / (pop_ca_co_mt.conac + 0.5)
+            + 1.0 / (pop_ca_co_mt.conac + 0.5))
         )
         pop_ca_co_mt = pop_ca_co_mt.annotate_rows(fet_p_value=pop_ca_co_mt.fet.p_value)
 
